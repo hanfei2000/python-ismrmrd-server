@@ -6,3 +6,5 @@
 *.tar
 *.zip
 data/
+.venv
+.vscode

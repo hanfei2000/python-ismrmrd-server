@@ -15,7 +15,7 @@ class Server:
     Something something docstring.
     """
 
-    def __init__(self, address, port, savedata, savedataFolder):
+    def __init__(self, address, port, savedata, savedataFolder, mp):
         logging.info("Starting server and listening for data at %s:%d", address, port)
         if (savedata is True):
             logging.debug("Saving incoming data is enabled.")
@@ -25,27 +25,33 @@ class Server:
         self.socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
         self.socket.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
         self.socket.bind((address, port))
+        self.bMultiProcessing = mp
 
     def serve(self):
         logging.debug("Serving... ")
         self.socket.listen(0)
 
         while True:
+            print("[hanfei]... start")
             sock, (remote_addr, remote_port) = self.socket.accept()
 
             logging.info("Accepting connection from: %s:%d", remote_addr, remote_port)
 
-            process = multiprocessing.Process(target=self.handle, args=[sock])
-            process.daemon = True
-            process.start()
-
-            logging.debug("Spawned process %d to handle connection.", process.pid)
+            if self.bMultiProcessing:
+                process = multiprocessing.Process(target=self.handle, args=[sock])
+                process.daemon = True
+                process.start()
+                logging.debug("Spawned process %d to handle connection.", process.pid)
+            else:
+                self.handle(sock)
+            
+            print("[hanfei]... end")
 
     def handle(self, sock):
 
         try:
             connection = Connection(sock, self.savedata, "", self.savedataFolder, "dataset")
-
+            
             # First message is the config (file or text)
             config = next(connection)
 

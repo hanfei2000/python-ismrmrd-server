@@ -7,8 +7,8 @@ import numpy as np
 import numpy.fft as fft
 
 # Folder for debug output files
-debugFolder = "/tmp/share/debug"
-
+# debugFolder = "/tmp/share/debug"
+debugFolder = "./savedata/"
 def process(connection, config, metadata):
     logging.info("Config: \n%s", config)
 
@@ -113,6 +113,8 @@ def process_raw(group, config, metadata):
     # Invert image contrast
     data = 32767-data
     data = np.abs(data)
+     # hanfei
+    data = np.ones(data.shape)*666   
     data = data.astype(np.int16)
     np.save(debugFolder + "/" + "imgInverted.npy", data)
 
@@ -122,6 +124,7 @@ def process_raw(group, config, metadata):
     logging.debug("Image without oversampling is size %s" % (data.shape,))
     np.save(debugFolder + "/" + "imgCrop.npy", data)
 
+   
     # Format as ISMRMRD image data
     image = ismrmrd.Image.from_array(data, acquisition=group[0])
     image.image_index = 1
